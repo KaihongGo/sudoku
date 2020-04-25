@@ -16,10 +16,10 @@ public:
     void undo();
 
 private:
-    CScene *_pOwner;
-    point_t _stPoint;
-    int _nPreValue;
-    int _nCurValue;
+    CScene *_pOwner;    //当前场景
+    point_t _stPoint;   
+    int _nPreValue;     //前一个点
+    int _nCurValue;     //当前点
 };
 
 #endif

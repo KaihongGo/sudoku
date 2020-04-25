@@ -1,6 +1,7 @@
 #ifndef _SUDOKU_BLOCK_H_
 #define _SUDOKU_BLOCK_H_
 
+//CBlock类是 块 的意思；存储块信息
 class CBlock
 {
     static const int MAX_COUNT = 9; //是否可初始化

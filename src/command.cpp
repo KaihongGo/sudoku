@@ -15,11 +15,12 @@ CCommand::~CCommand() {}
 
 bool CCommand::excute(int nInputValue)
 {
-    if (!_pOwner) //如果_pOwner为空指针
+    if (!_pOwner) //如果_pOwner为空指针;cscene创建失败
         return false;
-
+    //_pOwner场景类
     _stPoint = _pOwner->getCurPoint();
-    return _pOwner->setCurValue(nInputValue, _nPreValue); //不理解
+    return _pOwner->setCurValue(nInputValue, _nPreValue);
+    //_nPreValue前一个值
 }
 
 void CCommand::undo()

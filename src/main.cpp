@@ -2,15 +2,26 @@
 #include <string>
 #include "scene.h"
 #include "input.h"
-#include "test.h"
 
-#define _TEST_ 1
+#define _TEST_ 0
+
+void test0()
+{
+    CScene scene;
+    time_t begin, end;
+    time(&begin);
+    scene.generate();
+    time(&end);
+    scene.show();
+    std::cout << end - begin << std::endl;
+}
 
 int main()
 {
-#if _TEST_ //调起测试程序
-    test_case1();
-    getchar();
+    //main()作为工程入口
+
+#if _TEST_
+    test0();
 #else
     CScene scene;
 
@@ -20,8 +31,6 @@ int main()
 
     scene.eraseRandomGrids(erase_grid_number);
     scene.play();
-
 #endif
-
     return 0;
 }

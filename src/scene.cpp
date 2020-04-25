@@ -7,17 +7,74 @@
 #include "scene.h"
 #include "utility.inl"
 
-CScene::CScene(int index)
-    : _index(index), _max_column(pow(index, 2)),
-      _cur_point({0, 0})
+//构造函数
+//_index无用
+CScene::CScene()
+    : _cur_point({0, 0})
 {
-    init();
+    //用UNSELECTED空状态填充数组
+    memset(_map, UNSELECTED, sizeof(_map));
+    //column_block 所有列；按单一列存储
+    for (int column = 0; column < 9; ++column)
+    {
+        //一次循环解决一个
+        CBlock column_block;
+        for (int row = 0; row < 9; ++row)
+        {
+            //column_block.push_back(&_map[row * 9 + column]);
+            column_block.push_back(_map + row * 9 + column);
+        }
+        _column_block[column] = column_block;
+    }
+
+    //row_block 所有行
+    for (int row = 0; row < 9; ++row)
+    {
+        CBlock row_block;
+        for (int column = 0; column < 9; ++column)
+        {
+            row_block.push_back(_map + row * 9 + column);
+        }
+        _row_block[row] = row_block;
+    }
+
+    //xy_block 所有九宫格,[行][列]
+    for (int block_index = 0; block_index < 9; ++block_index)
+    {
+        CBlock xy_block;
+        //3*3 九宫格的下标
+        int row_index = block_index / 3;
+        int col_index = block_index % 3;
+        int xy_begin = row_index * 27 + col_index * 3;
+        //断定9空格对应开始的一维下标
+        //  index       r  c  row_i   col_i
+        //    0 -- 0    0  0    0       0
+        //    1 -- 3    0  3    0       1
+        //    2 -- 6    0  6    0       2
+        //    3 -- 27   3  0    1       0
+        //    4 -- 30   3  3    1       1
+        //    5 -- 33   3  6    1       2
+        //    6 -- 54   6  0    2       0
+        //    7 -- 57   6  3    2       1
+        //    8 -- 60   6  6    2       2
+        //得到数列通项公式
+        for (int i = 0; i < 3; i++)
+        {
+            for(int j = 0; j < 3; j++)
+            {
+                xy_block.push_back(_map + xy_begin + 9 * i + j);
+            }
+        }
+        _xy_block[row_index][col_index] = xy_block;
+    }
+    return;
 }
 
 CScene::~CScene()
 {
 }
 
+//打印下方横线
 void CScene::printUnderline(int line_no) const
 {
     std::string underline;
@@ -37,9 +94,8 @@ void CScene::printUnderline(int line_no) const
 void CScene::show() const
 {
     cls(); //清屏幕
-
     printUnderline();
-    for (int row = 0; row < _max_column; ++row)
+    for (int row = 0; row < 9; ++row)
     {
         auto block = _row_block[row]; //按行打印
         block.print();
@@ -47,58 +103,12 @@ void CScene::show() const
     }
 }
 
-void CScene::init()
-{
-    memset(_map, UNSELECTED, sizeof(_map));
-    //column_block 所有列
-    for (int column = 0; column < _max_column; ++column)
-    {
-        //一次循环解决一个
-        CBlock column_block;
-        for (int row = 0; row < _max_column; ++row)
-        {
-            column_block.push_back(_map + row * 9 + column);
-        }
-        _column_block[column] = column_block;
-    }
-
-    //row_block 所有行
-    for (int row = 0; row < _max_column; ++row)
-    {
-        CBlock row_block;
-        for (int column = 0; column < _max_column; ++column)
-        {
-            row_block.push_back(_map + row * 9 + column);
-        }
-        _row_block[row] = row_block;
-    }
-
-    //xy_block 所有九宫格,[行][列]
-    for (int block_index = 0; block_index < _max_column; ++block_index)
-    {
-        CBlock xy_block;
-
-        int xy_begin = block_index / 3 * 27 + block_index % 3 * 3;
-        xy_block.push_back(_map + xy_begin);
-        xy_block.push_back(_map + xy_begin + 1);
-        xy_block.push_back(_map + xy_begin + 2);
-        xy_block.push_back(_map + xy_begin + 9);
-        xy_block.push_back(_map + xy_begin + 10);
-        xy_block.push_back(_map + xy_begin + 11);
-        xy_block.push_back(_map + xy_begin + 18);
-        xy_block.push_back(_map + xy_begin + 19);
-        xy_block.push_back(_map + xy_begin + 20);
-        _xy_block[block_index / 3][block_index % 3] = xy_block;
-    }
-
-    return;
-}
-
+//设置当前结点为nCurValue；引用返回存储前一个值
 bool CScene::setCurValue(const int nCurValue, int &nLastValue)
 {
     auto point = _map[_cur_point.x + _cur_point.y * 9];
     if (ERASED == point.state)
-    {
+    {                             //该状态为ERASED删除状态
         nLastValue = point.value; //撤销用；引用传参数
         setValue(nCurValue);
         return true;
@@ -107,7 +117,7 @@ bool CScene::setCurValue(const int nCurValue, int &nLastValue)
         return false;
 }
 
-//一个场景可以多次被初始化
+//一个场景可以多次被初始化；产生完整数独图
 void CScene::generate()
 {
     //9行9列
@@ -132,6 +142,8 @@ void CScene::generate()
     std::map<char, int> hash_map;
     for (int i = 1; i <= 9; ++i)
     {
+        //此算法经常使用
+        //从容器中随机取出一个字母，与下标对应
         int r = random(0, v.size() - 1); //随机下标
         char key = v[r];
         v.erase(v.begin() + r); //v.size() 每次均改变
@@ -155,7 +167,7 @@ void CScene::generate()
 void CScene::setValue(const point_t &p, const int value)
 {
     //再映射过程
-    //_map代表grid结构
+    //_map代表grid结构一维
     _map[p.x + p.y * 9].value = value;
 }
 
@@ -170,6 +182,7 @@ bool CScene::isComplete()
     //任何一个block未被填满，则肯定未完成
     for (size_t i = 0; i < 81; ++i)
     {
+        //UNSELECTED为0；表示状态；_map空默认为0
         if (UNSELECTED == _map[i].value)
             return false;
     }
@@ -200,6 +213,7 @@ void CScene::eraseRandomGrids(const int count)
     //开始删除
     for (int i = 0; i < count; ++i)
     {
+        //相同策略，容器改变，从容器中取出元素
         int r = random(0, v.size() - 1);
         _map[v[r]] = p;
         v.erase(v.begin() + r);
@@ -209,7 +223,6 @@ void CScene::eraseRandomGrids(const int count)
 void CScene::play()
 {
     show();
-
     char key = '\0';
     while (true)
     {
@@ -220,12 +233,14 @@ void CScene::play()
             //CCommand类；用CScene构造
             if (!oCommand.excute(key - '0'))
             {
-                //当前位置不可以修改
+                //返回值为bool类型，当前位置不可以修改
                 std::cout << "this number can't be modified!" << std::endl;
             }
             else
             {
-                _vCommand.push_back(std::move(oCommand)); //不理解？？？
+                //已修改
+                //_vCommand:vector<>类型用作栈，实现连续撤销
+                _vCommand.push_back(std::move(oCommand)); //C++11右值引用
                 show();
                 continue;
             }
@@ -273,7 +288,7 @@ void CScene::play()
             show();
             break;
         case 0x77: //w
-            _cur_point.y = (_cur_point.y + 1) < 0 ? 0 : _cur_point.y - 1;
+            _cur_point.y = (_cur_point.y - 1) < 0 ? 0 : _cur_point.y - 1;
             show();
             break;
 

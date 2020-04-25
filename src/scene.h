@@ -12,7 +12,7 @@
 class CScene
 {
 public:
-    CScene(int index = 3);
+    CScene();
     virtual ~CScene(); //虚析构函数
 
     void generate();
@@ -34,15 +34,13 @@ private:
     void printUnderline(int line_no = -1) const;
 
 private:
-    int _index;
-    int _max_column;
-    point_t _cur_point; //当前光标的位置
-    CBlock _column_block[9];
-    CBlock _row_block[9];
-    CBlock _xy_block[3][3];
-    point_value_t _map[81]; //以为存储整张图
+    point_t _cur_point;      //当前光标的位置
+    CBlock _column_block[9]; //按column存储一列
+    CBlock _row_block[9];    //按row存储一行
+    CBlock _xy_block[3][3];  //九宫格
+    point_value_t _map[81];  //一维存储整张图，结点信息
 
-    std::vector<CCommand> _vCommand;
+    std::vector<CCommand> _vCommand; //存储已执行命令
 };
 
 #endif
