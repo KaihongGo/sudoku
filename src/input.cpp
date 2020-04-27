@@ -20,9 +20,9 @@ int inputDifficulty()
         switch (difficulty)
         {
         case EASY:  //用枚举量意义明显
-            return 20;
+            return 10;
         case NORMAL:
-            return 35;
+            return 20;
         case HARD:
             return 50;
         default:

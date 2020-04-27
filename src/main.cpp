@@ -26,9 +26,7 @@ int main()
     CScene scene;
 
     int erase_grid_number = inputDifficulty();
-
     scene.generate();
-
     scene.eraseRandomGrids(erase_grid_number);
     scene.play();
 #endif

@@ -10,21 +10,8 @@
 inline unsigned int random(int begin, int end)
 {
     assert(end >= begin && begin >= 0);
-    srand(time(NULL));
+    srand(time(0));
     return (unsigned int)rand() % (end - begin + 1) + begin;
-}
-
-//网上找的均匀化随机数算法，不含max，非随机，弃用
-inline int AverageRandom(int min, int max)
-{
-    int minInteger = min * 10000;
-    int maxInteger = max * 10000;
-    srand(time(NULL));
-    int randInteger = rand() * rand();
-    int diffInteger = maxInteger - minInteger;
-    int resultInteger = randInteger % diffInteger + minInteger;
-
-    return (resultInteger / 10000);
 }
 
 #ifdef _WIN32
@@ -58,11 +45,12 @@ inline char getch(void)
     return c;
 }
 #endif //end _WIN32
+
 inline void cls(void)
 {
 #ifdef _WIN32
     system("cls");
-#else  
+#else
     system("clear");
 #endif
 }

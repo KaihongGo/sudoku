@@ -1,16 +1,6 @@
 #include "scene.h"
 #include "command.h"
 
-CCommand::CCommand(CScene *pOwner) : _pOwner(pOwner)
-{
-}
-
-CCommand::CCommand(const CCommand &rhs)
-    : _pOwner(rhs._pOwner), _stPoint(rhs._stPoint), _nPreValue(rhs._nPreValue), _nCurValue(rhs._nCurValue)
-{
-    //拷贝构造函数
-}
-
 CCommand::~CCommand() {}
 
 bool CCommand::excute(int nInputValue)

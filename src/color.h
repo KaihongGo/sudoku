@@ -1,8 +1,8 @@
 #ifndef _SUDOKU_COLOR_H
 #define _SUDOKU_COLOR_H
-
 #include <iostream>
 
+//Color命名空间；管理控制台颜色
 namespace Color
 {
 enum Code
@@ -42,9 +42,9 @@ class Modifier
 
 public:
     Modifier(Code pCode) : code(pCode) {}
-    friend std::ostream & operator<<(std::ostream &os, const Modifier &mod)
+    //重载输出运算符
+    friend std::ostream &operator<<(std::ostream &os, const Modifier &mod)
     {
-        //重载输出运算符
         return os << "\033[" << mod.code << "m";
         //oct\033 ESC; ANSI
     }
